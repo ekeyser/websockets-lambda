@@ -1,0 +1,35 @@
+{
+  "name": "websockets-lambda",
+  "version": "0.0.23",
+  "description": "",
+  "main": "dist/index.ts",
+  "repository": "ekeyser/websockets-lambda",
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build-rollup": "rollup -c",
+    "build-closure": "rollup -c && google-closure-compiler --language_in=ECMASCRIPT5_STRICT --js build/index.js --js_output_file build/index.min.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "node_modules/typescript/bin/tsc -w --preserveWatchOutput"
+  },
+  "author": "emkeyser",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ekeyser/websockets-lambda/issues"
+  },
+  "homepage": "https://github.com/ekeyser/websockets-lambda",
+  "dependencies": {
+    "@aws-sdk/client-apigatewaymanagementapi": "^3.414.0",
+    "@aws-sdk/client-dynamodb": "^3.414.0",
+    "@aws-sdk/client-lambda": "^3.414.0",
+    "@types/aws-lambda": "^8.10.121",
+    "aws-lambda": "^1.0.7",
+    "aws-serverless-express": "^3.4.0"
+  },
+  "devDependencies": {
+    "@tsconfig/node18": "^18.2.2",
+    "@types/node": "^20.6.2",
+    "typescript": "^5.2.2"
+  }
+}
