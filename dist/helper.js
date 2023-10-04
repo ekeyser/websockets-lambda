@@ -1,7 +1,10 @@
-import { DeleteItemCommand, DynamoDBClient, GetItemCommand, PutItemCommand, QueryCommand, } from "@aws-sdk/client-dynamodb";
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getPartnerIdCohortFromDynamo = exports.delClientFromDynamo = exports.delPartnerFromCohortTable = exports.addClientToDynamo = exports.getPartners = void 0;
+const client_dynamodb_1 = require("@aws-sdk/client-dynamodb");
 const _config = {};
-let dynamoClient = new DynamoDBClient(_config);
-export const getPartners = async (cohort) => {
+let dynamoClient = new client_dynamodb_1.DynamoDBClient(_config);
+const getPartners = async (cohort) => {
     const params = {
         TableName: process.env.COHORT_TABLE_NAME,
         KeyConditionExpression: "cohort = :c ",
@@ -9,8 +12,9 @@ export const getPartners = async (cohort) => {
             ":c": { S: cohort, },
         },
     };
-    return await dynamoClient.send(new QueryCommand(params));
+    return await dynamoClient.send(new client_dynamodb_1.QueryCommand(params));
 };
+exports.getPartners = getPartners;
 const addClientToCohortTable = async (cohort, partner_id, connection_id) => {
     const Item = {
         cohort: {
@@ -27,10 +31,10 @@ const addClientToCohortTable = async (cohort, partner_id, connection_id) => {
         TableName: process.env.COHORT_TABLE_NAME,
         Item,
     };
-    const command = new PutItemCommand(input);
+    const command = new client_dynamodb_1.PutItemCommand(input);
     return dynamoClient.send(command);
 };
-export const addClientToDynamo = async (connection_id, partner_id, cohort) => {
+const addClientToDynamo = async (connection_id, partner_id, cohort) => {
     await addClientToCohortTable(cohort, partner_id, connection_id);
     const Item = {
         connection_id: {
@@ -47,10 +51,11 @@ export const addClientToDynamo = async (connection_id, partner_id, cohort) => {
         TableName: process.env.CONNECTION_TABLE_NAME,
         Item,
     };
-    const command = new PutItemCommand(input);
+    const command = new client_dynamodb_1.PutItemCommand(input);
     return dynamoClient.send(command);
 };
-export const delPartnerFromCohortTable = (cohort, partner_id) => {
+exports.addClientToDynamo = addClientToDynamo;
+const delPartnerFromCohortTable = (cohort, partner_id) => {
     const Key = {
         cohort: {
             S: cohort,
@@ -63,14 +68,15 @@ export const delPartnerFromCohortTable = (cohort, partner_id) => {
         TableName: process.env.COHORT_TABLE_NAME,
         Key,
     };
-    const command = new DeleteItemCommand(input);
+    const command = new client_dynamodb_1.DeleteItemCommand(input);
     return dynamoClient.send(command);
 };
-export const delClientFromDynamo = async (connection_id) => {
-    const partnerIdCohortResponse = await getPartnerIdCohortFromDynamo(connection_id);
+exports.delPartnerFromCohortTable = delPartnerFromCohortTable;
+const delClientFromDynamo = async (connection_id) => {
+    const partnerIdCohortResponse = await (0, exports.getPartnerIdCohortFromDynamo)(connection_id);
     if (partnerIdCohortResponse.Item !== undefined) {
         if (partnerIdCohortResponse.Item.cohort.S !== undefined && partnerIdCohortResponse.Item.partner_id.S !== undefined) {
-            await delPartnerFromCohortTable(partnerIdCohortResponse.Item.cohort.S, partnerIdCohortResponse.Item.partner_id.S);
+            await (0, exports.delPartnerFromCohortTable)(partnerIdCohortResponse.Item.cohort.S, partnerIdCohortResponse.Item.partner_id.S);
         }
     }
     const Key = {
@@ -82,10 +88,11 @@ export const delClientFromDynamo = async (connection_id) => {
         TableName: process.env.CONNECTION_TABLE_NAME,
         Key,
     };
-    const command = new DeleteItemCommand(input);
+    const command = new client_dynamodb_1.DeleteItemCommand(input);
     return dynamoClient.send(command);
 };
-export const getPartnerIdCohortFromDynamo = (connection_id) => {
+exports.delClientFromDynamo = delClientFromDynamo;
+const getPartnerIdCohortFromDynamo = (connection_id) => {
     const Key = {
         connection_id: {
             S: connection_id,
@@ -95,6 +102,7 @@ export const getPartnerIdCohortFromDynamo = (connection_id) => {
         TableName: process.env.CONNECTION_TABLE_NAME,
         Key,
     };
-    const command = new GetItemCommand(input);
+    const command = new client_dynamodb_1.GetItemCommand(input);
     return dynamoClient.send(command);
 };
+exports.getPartnerIdCohortFromDynamo = getPartnerIdCohortFromDynamo;

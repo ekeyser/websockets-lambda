@@ -1,7 +1,10 @@
-import { ApiGatewayManagementApiClient, PostToConnectionCommand, } from "@aws-sdk/client-apigatewaymanagementapi";
-import { getPartners, addClientToDynamo, } from './helper.js';
-import { Actions } from './Actions.js';
-import { TextEncoder } from "util";
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.WebsocketsLambda = void 0;
+const client_apigatewaymanagementapi_1 = require("@aws-sdk/client-apigatewaymanagementapi");
+const helper_js_1 = require("./helper.js");
+const Actions_js_1 = require("./Actions.js");
+const util_1 = require("util");
 class WebsocketsLambda {
     constructor(event, config) {
         this.main = async (event, config) => {
@@ -62,21 +65,21 @@ class WebsocketsLambda {
                         apiVersion: "2018-11-29",
                         endpoint: "https://" + event.requestContext.domainName,
                     };
-                    const client = new ApiGatewayManagementApiClient(_config);
+                    const client = new client_apigatewaymanagementapi_1.ApiGatewayManagementApiClient(_config);
                     _send = async (ConnectionId, data) => {
-                        const enc = new TextEncoder();
+                        const enc = new util_1.TextEncoder();
                         let Data = enc.encode(JSON.stringify(data));
                         const input = {
                             ConnectionId,
                             Data,
                         };
-                        const command = new PostToConnectionCommand(input);
+                        const command = new client_apigatewaymanagementapi_1.PostToConnectionCommand(input);
                         return await client.send(command);
                     };
                 };
                 const registerClientConnection = async (event, connectionId, oBody) => {
                     try {
-                        await addClientToDynamo(connectionId, oBody.partner_id, oBody.cohort);
+                        await (0, helper_js_1.addClientToDynamo)(connectionId, oBody.partner_id, oBody.cohort);
                     }
                     catch (e) {
                         console.error(e);
@@ -94,13 +97,13 @@ class WebsocketsLambda {
                 Main function where inventory payloads are dropped
                  */
                 const handleInventoryMessage = async (event, oBody) => {
-                    const actions = new Actions(event, oBody);
+                    const actions = new Actions_js_1.Actions(event, oBody);
                     await actions.init();
                 };
                 const handleNotificationMessage = async (event, oBody) => {
                     console.log(event);
                     console.log(`...........${connectionId}.......${routeKey}.......${eventType}`);
-                    let objDynamoResponse = await getPartners(oBody.cohort);
+                    let objDynamoResponse = await (0, helper_js_1.getPartners)(oBody.cohort);
                     if (objDynamoResponse.Items !== undefined) {
                         for (let i = 0; i < objDynamoResponse.Items.length; i++) {
                             _begin(event);
@@ -121,7 +124,7 @@ class WebsocketsLambda {
                     }
                 };
                 const handleDefaultActionMessage = async (event, oBody) => {
-                    let objDynamoResponse = await getPartners(oBody.cohort);
+                    let objDynamoResponse = await (0, helper_js_1.getPartners)(oBody.cohort);
                     if (objDynamoResponse.Items !== undefined) {
                         for (let i = 0; i < objDynamoResponse.Items.length; i++) {
                             _begin(event);
@@ -179,4 +182,4 @@ class WebsocketsLambda {
         this.config = config;
     }
 }
-export { WebsocketsLambda };
+exports.WebsocketsLambda = WebsocketsLambda;
